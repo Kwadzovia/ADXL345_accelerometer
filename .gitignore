@@ -1,0 +1,17 @@
+*.bin
+*.elf
+*.list
+*.map
+*.list
+!objects.list
+*.d
+*.o
+*.su
+*.launch
+
+.project
+.cproject
+.mxproject
+ADXL345_accelerometer/Debug/
+.vscode/
+.settings/
