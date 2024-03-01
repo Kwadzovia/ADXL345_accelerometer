@@ -1,0 +1,32 @@
+/**
+  ******************************************************************************
+  * @file    adxl345.h
+  * @brief   This file contains all the function prototypes for
+  *          the adxl345.c file
+  * @author  Seli Kwadzovia
+  ******************************************************************************
+
+  *
+  * This software is licensed under terms that can be found in the LICENSE file
+  * in the root directory of this software component.
+  * If no LICENSE file comes with this software, it is provided AS-IS.
+  *
+  ******************************************************************************
+  */
+
+#ifndef __ADXL345_H__
+#define __ADXL345_H__
+
+// Includes
+#include "stm32f4xx_hal.h"
+#include <stdint.h>
+
+// Defines
+#define ADXL345_RW_BIT (1 << 7) // SPI Read-Write Bit
+#define ADXL345_MB_BIT (1 << 6) // SPI Multi-Byte Bit
+
+// Function Prototypes
+HAL_StatusTypeDef adxl345_read_register(uint8_t *rx_data, uint8_t register_addr, uint32_t num_bytes);
+HAL_StatusTypeDef adxl345_write_register(uint8_t *input_data, uint8_t register_addr, uint32_t num_bytes);
+
+#endif // #ifndef __ADXL345_H__

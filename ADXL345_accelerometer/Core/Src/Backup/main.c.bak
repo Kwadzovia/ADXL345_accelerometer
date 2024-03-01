@@ -95,29 +95,36 @@ int main(void)
     MX_SPI3_Init();
     MX_USART2_UART_Init();
     /* USER CODE BEGIN 2 */
-    char dataString[10];
+    srand(HAL_GetTick());
+    char randValue[2] = {0, 0};
+    char dataString[10] = "100.00";
     uint16_t numCharacters = 0;
-    int16_t acceleration_value = 0;
+    int16_t x_acc = 0;
 
-    adxl345_init();
+    // Turn Off Standby
+    randValue[0] = (1 << 3);
+    adxl345_write_register(&randValue, 0x2D, 1);
+
     /* USER CODE END 2 */
 
     /* Infinite loop */
     /* USER CODE BEGIN WHILE */
     while (1)
     {
-        adxl345_read_acc(&acceleration_value, E_ADXL345_X_ACC);
-        numCharacters = snprintf(dataString, 10, "%d", acceleration_value);
-        HAL_UART_Transmit(&huart2, &dataString, numCharacters, HAL_MAX_DELAY);
-        HAL_UART_Transmit(&huart2, "\t", 1, HAL_MAX_DELAY);
+        adxl345_read_register(&randValue[0], 0x32, 2);
 
-        adxl345_read_acc(&acceleration_value, E_ADXL345_Y_ACC);
-        numCharacters = snprintf(dataString, 10, "%d", acceleration_value);
-        HAL_UART_Transmit(&huart2, &dataString, numCharacters, HAL_MAX_DELAY);
-        HAL_UART_Transmit(&huart2, "\t", 1, HAL_MAX_DELAY);
+        if (randValue[1] & (1 << 7))
+        {
+            randValue[0] = ~randValue[0];
+            randValue[1] = ~randValue[1];
+            x_acc = (int16_t)(-(randValue[0] + (randValue[1] << 8) + 1));
+        }
+        else
+        {
+            x_acc = (int16_t)(randValue[0] + (randValue[1] << 8));
+        }
 
-        adxl345_read_acc(&acceleration_value, E_ADXL345_Z_ACC);
-        numCharacters = snprintf(dataString, 10, "%d", acceleration_value);
+        numCharacters = snprintf(dataString, 10, "%d", x_acc);
         HAL_UART_Transmit(&huart2, &dataString, numCharacters, HAL_MAX_DELAY);
         HAL_UART_Transmit(&huart2, "\r\n", 2, HAL_MAX_DELAY);
 
