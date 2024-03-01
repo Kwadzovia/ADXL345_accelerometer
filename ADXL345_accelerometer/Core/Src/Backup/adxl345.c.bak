@@ -1,0 +1,79 @@
+/**
+ ******************************************************************************
+ * @file    adxl345.c
+ * @brief   Adxl345 accelerometer driver. Made to work with NucleoF446RE.
+ *             Replace the SPI or I2C write functions to use on a different
+ *             platform. Interrupt handling is platform specific and can be
+ *             removed.
+ * @author  Seli Kwadzovia
+ ******************************************************************************
+ */
+
+#include "../Inc/adxl345.h"
+#include "gpio.h"
+#include "stm32f4xx_hal.h"
+#include <spi.h>
+#include <stdint.h>
+
+HAL_StatusTypeDef adxl345_read_register(uint8_t *rx_data, uint8_t register_addr, uint32_t num_bytes)
+{
+    HAL_StatusTypeDef returnVal = HAL_OK;
+    uint8_t command_byte = register_addr;
+
+    // Set Multi Byte Bit
+    if (num_bytes == 0)
+    {
+        returnVal = HAL_ERROR;
+        return returnVal;
+    }
+    else if (num_bytes == 1)
+    {
+        command_byte &= ~(ADXL345_MB_BIT);
+    }
+    else
+    {
+        command_byte |= ADXL345_MB_BIT;
+    }
+
+    // Set Read-Write Bit
+    command_byte |= ADXL345_RW_BIT;
+
+    // Start Transfer
+    HAL_GPIO_WritePin(SPI2_CS_GPIO_Port, SPI2_CS_Pin, GPIO_PIN_RESET);
+    returnVal |= HAL_SPI_Transmit(&hspi2, &command_byte, 1, HAL_MAX_DELAY);
+    returnVal |= HAL_SPI_TransmitReceive(&hspi2, &command_byte, rx_data, num_bytes, HAL_MAX_DELAY);
+    HAL_GPIO_WritePin(SPI2_CS_GPIO_Port, SPI2_CS_Pin, GPIO_PIN_SET);
+
+    return returnVal;
+};
+
+HAL_StatusTypeDef adxl345_write_register(uint8_t *input_data, uint8_t register_addr, uint32_t num_bytes)
+{
+    HAL_StatusTypeDef returnVal = HAL_OK;
+    uint8_t command_byte = register_addr;
+
+    // Set Multi Byte Bit
+    if (num_bytes == 0)
+    {
+        returnVal = HAL_ERROR;
+        return returnVal;
+    }
+    else if (num_bytes == 1)
+    {
+        command_byte &= ~(ADXL345_MB_BIT);
+    }
+    else
+    {
+        command_byte |= ADXL345_MB_BIT;
+    }
+
+    // Set Read-Write Bit
+    command_byte &= ~(ADXL345_RW_BIT);
+
+    HAL_GPIO_WritePin(SPI2_CS_GPIO_Port, SPI2_CS_Pin, GPIO_PIN_RESET);
+    returnVal |= HAL_SPI_Transmit(&hspi2, &command_byte, 1, HAL_MAX_DELAY);
+    returnVal |= HAL_SPI_Transmit(&hspi2, input_data, num_bytes, HAL_MAX_DELAY);
+    HAL_GPIO_WritePin(SPI2_CS_GPIO_Port, SPI2_CS_Pin, GPIO_PIN_SET);
+
+    return returnVal;
+};
